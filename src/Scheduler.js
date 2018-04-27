@@ -40,7 +40,7 @@ class Scheduler {
     }
 
     allEmpty() {
-        if (!this.blockingQueue.isEmpty()) return false;
+        return this.runningQueues.every(queue => queue.isEmpty()) && this.blockingQueue.isEmpty();
     }
 
     addNewProcess(process) {

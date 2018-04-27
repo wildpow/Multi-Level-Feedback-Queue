@@ -5,11 +5,12 @@ const { SchedulerInterrupt } = require('./constants/index');
 // needs in order to complete, or we can specify if the process
 // is blocking; if so, the amount of blocking time needed is
 // randomly determined.
+
 class Process {
     constructor(pid, cpuTimeNeeded=null, blocking=false) {
         this._pid = pid;
         this.queue = null;
-        this.cpuTimeNeeded = cpuTimeNeeded ? cpuTimeNeeded : Math.round(Math.random() * 1000);
+        this.cpuTimeNeeded = (cpuTimeNeeded !== null) ? cpuTimeNeeded : Math.round(Math.random() * 1000);
         this.blockingTimeNeeded = blocking ? Math.round(Math.random() * 100) : 0;
         // A bool representing whether this process was toggled from blocking to non-blocking or vice versa
         this.stateChanged = false;
@@ -20,10 +21,7 @@ class Process {
     }
 
     isFinished() {
-        if (this.cpuTimeNeeded > 0) return false;
-        if (this.blockingTimeNeeded > 0) return false;
-
-        return true;
+        return (this.cpuTimeNeeded === 0 && this.blockingTimeNeeded === 0)
     }
 
     // If no blocking time is needed by this process, decrement the amount of 

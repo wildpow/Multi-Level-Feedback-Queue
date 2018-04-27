@@ -20,7 +20,7 @@ class Queue {
     // Enqueues the given process. Return the enqueue'd process
     enqueue(process) {
         process.setParentQueue(this);
-        return this.process.push(process);;
+        return this.processes.push(process);;
     }
 
     // Dequeues the next process in the queue. Return the dequeue'd process
@@ -50,18 +50,18 @@ class Queue {
     // Once a process has received the alloted time, it needs to be dequeue'd and 
     // then handled accordingly, depending on whether it has finished executing or not
     manageTimeSlice(currentProcess, time) {
-        if (currentProcess.isStateChanged) {
+        if (currentProcess.isStateChanged()) {
             this.quantumClock = 0;
             return;
         }
         this.quantumClock += time;
 
-        if (this.quantumClock > this.quantum) {
+        if (this.quantumClock >= this.quantum) {
             this.quantumClock = 0;
             let process = this.dequeue();
 
-            if (!process.isFinished()) {
-                handleInterrupt(queue)
+            if (!currentProcess.isFinished()) {
+                this.scheduler.handleInterrupt(this, currentProcess, SchedulerInterrupt)
             }
         }
     }
@@ -81,7 +81,7 @@ class Queue {
     doBlockingWork(time) {
         let process = this.peek();
 
-        process.executeBlockingProcess(time);
+        process.doBlockingWork(time);
         this.manageTimeSlice(process, time);
     }
 
@@ -89,7 +89,15 @@ class Queue {
     // Should handle PROCESS_BLOCKED and PROCESS_READY interrupts
     // The process also needs to be removed from the queue
     emitInterrupt(source, interrupt) {
-        
+        const sourceIndex = this.processes.indexOf(source);
+        this.processes.splice(sourceIndex, 1)
+
+        switch(interrupt) {
+            case SchedulerInterrupt.PROCESS_BLOCKED:
+                this.scheduler.handleInterrupt(this, source, SchedulerInterrupt.PROCESS_BLOCKED)
+                break;
+            
+        }
     }
 }
 
